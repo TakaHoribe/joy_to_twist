@@ -67,19 +67,22 @@ void JoyToTwist::joyCallback(const sensor_msgs::Joy& joy)
 {
   geometry_msgs::Twist vel;
 
-  double joy_L_ver, joy_L2, joy_R2;
+  double joy_L_ver, joy_L_hor, joy_L2, joy_R2;
   if (connection_mode_ == "usb"){
     joy_L_ver = joy.axes[LEFT_STICK_VERTICAL_U];
+    joy_L_hor = joy.axes[LEFT_STICK_HORIZONTAL_U];
     joy_L2 = joy.axes[L2_U];
     joy_R2 = joy.axes[R2_U];
   } else if (connection_mode_ == "bluetooth") {
     joy_L_ver = joy.axes[LEFT_STICK_VERTICAL_B];
+    joy_L_hor = joy.axes[LEFT_STICK_HORIZONTAL_B];
     joy_L2 = joy.axes[L2_B];
     joy_R2 = joy.axes[R2_B];
   }
 
   vel.linear.x = l_scale_ * joy_L_ver;
-  vel.angular.z = a_scale_ * (joy_R2 - joy_L2) / 2.0;
+  //vel.angular.z = a_scale_ * (joy_R2 - joy_L2) / 2.0;
+  vel.angular.z = a_scale_ * joy_L_hor;
 
   vel_pub_.publish(vel);
 }
