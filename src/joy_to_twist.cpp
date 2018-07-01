@@ -81,8 +81,8 @@ void JoyToTwist::joyCallback(const sensor_msgs::Joy& joy)
   }
 
   vel.linear.x = l_scale_ * joy_L_ver;
-  vel.angular.z = a_scale_ * (joy_R2 - joy_L2) / 2.0;
-  //vel.angular.z = a_scale_ * joy_L_hor;
+  //vel.angular.z = a_scale_ * (joy_R2 - joy_L2) / 2.0;
+  vel.angular.z = a_scale_ * joy_L_hor;
 
   vel_pub_.publish(vel);
 }
