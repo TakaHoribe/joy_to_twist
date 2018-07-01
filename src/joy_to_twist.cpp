@@ -18,26 +18,26 @@ private:
   ros::Publisher vel_pub_;
   ros::Subscriber joy_sub_;
 
-  std::string connection_mode_;
+  int connection_mode_;
 
-  enum JoyAxesUSB {
-    LEFT_STICK_HORIZONTAL_U = 0,
-    LEFT_STICK_VERTICAL_U = 1,
-    L2_U = 2,
-    RIGHT_STICK_HORIZONTAL_U = 3,
-    RIGHT_STICK_VERTICAL_U = 4,
-    R2_U = 5,
-    CROSS_HORIZONTAL_U = 6,
-    CROSS_VERTICAL_U = 7
+  enum JoyAxesJS1 {
+    LEFT_STICK_HORIZONTAL_1 = 0,
+    LEFT_STICK_VERTICAL_1 = 1,
+    L2_1 = 2,
+    RIGHT_STICK_HORIZONTAL_1 = 3,
+    RIGHT_STICK_VERTICAL_1 = 4,
+    R2_1 = 5,
+    CROSS_HORIZONTAL_1 = 6,
+    CROSS_VERTICAL_1 = 7
   };
 
-  enum JoyAxisBluetooth {
-    LEFT_STICK_HORIZONTAL_B = 0,
-    LEFT_STICK_VERTICAL_B = 1,
-    RIGHT_STICK_HORIZONTAL_B = 2,
-    L2_B = 3,
-    R2_B = 4,
-    RIGHT_STICK_VERTICAL_B = 5,
+  enum JoyAxisJS0 {
+    LEFT_STICK_HORIZONTAL_0 = 0,
+    LEFT_STICK_VERTICAL_0 = 1,
+    RIGHT_STICK_HORIZONTAL_0 = 2,
+    L2_0 = 3,
+    R2_0 = 4,
+    RIGHT_STICK_VERTICAL_0 = 5,
   };
 
 };
@@ -49,13 +49,13 @@ JoyToTwist::JoyToTwist():
 {
   pnh_.param("scale_angular", a_scale_, a_scale_);
   pnh_.param("scale_linear", l_scale_, l_scale_);
-  pnh_.param("mode", connection_mode_, std::string("default"));
+  pnh_.param("mode", connection_mode_, 1);
 
   std::cout << "mode = " << connection_mode_ << std::endl;
-  if (connection_mode_ != "usb" && connection_mode_ != "bluetooth"){
-    std::cout << "connection_mode is neither usb or bluetooth."
-                 " set usb as a default." << std::endl;
-    connection_mode_ = "usb";
+  if (connection_mode_ != 0 && connection_mode_ != 1){
+    std::cout << "connection_mode is neither 0 or 1."
+                 " set 1 as a default." << std::endl;
+    connection_mode_ = 1;
   }
 
   vel_pub_ = pnh_.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
@@ -68,21 +68,21 @@ void JoyToTwist::joyCallback(const sensor_msgs::Joy& joy)
   geometry_msgs::Twist vel;
 
   double joy_L_ver, joy_L_hor, joy_L2, joy_R2;
-  if (connection_mode_ == "usb"){
-    joy_L_ver = joy.axes[LEFT_STICK_VERTICAL_U];
-    joy_L_hor = joy.axes[LEFT_STICK_HORIZONTAL_U];
-    joy_L2 = joy.axes[L2_U];
-    joy_R2 = joy.axes[R2_U];
-  } else if (connection_mode_ == "bluetooth") {
-    joy_L_ver = joy.axes[LEFT_STICK_VERTICAL_B];
-    joy_L_hor = joy.axes[LEFT_STICK_HORIZONTAL_B];
-    joy_L2 = joy.axes[L2_B];
-    joy_R2 = joy.axes[R2_B];
+  if (connection_mode_ == 1){
+    joy_L_ver = joy.axes[LEFT_STICK_VERTICAL_1];
+    joy_L_hor = joy.axes[LEFT_STICK_HORIZONTAL_1];
+    joy_L2 = joy.axes[L2_1];
+    joy_R2 = joy.axes[R2_1];
+  } else if (connection_mode_ == 0) {
+    joy_L_ver = joy.axes[LEFT_STICK_VERTICAL_0];
+    joy_L_hor = joy.axes[LEFT_STICK_HORIZONTAL_0];
+    joy_L2 = joy.axes[L2_0];
+    joy_R2 = joy.axes[R2_0];
   }
 
   vel.linear.x = l_scale_ * joy_L_ver;
-  //vel.angular.z = a_scale_ * (joy_R2 - joy_L2) / 2.0;
-  vel.angular.z = a_scale_ * joy_L_hor;
+  vel.angular.z = a_scale_ * (joy_R2 - joy_L2) / 2.0;
+  //vel.angular.z = a_scale_ * joy_L_hor;
 
   vel_pub_.publish(vel);
 }
